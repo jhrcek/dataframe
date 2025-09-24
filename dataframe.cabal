@@ -140,6 +140,7 @@ test-suite tests
                    Operations.Take,
                    Parquet
                    Paths_dataframe
+    autogen-modules: Paths_dataframe
     build-depends:  base > 4 && < 5,
                     dataframe ^>= 0.3,
                     HUnit ^>= 1.6,
