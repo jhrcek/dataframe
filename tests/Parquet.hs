@@ -7,7 +7,7 @@ import qualified DataFrame as D
 import Data.Int
 import Data.Text (Text)
 import Data.Time
-import GHC.IO (unsafePerformIO)
+import Paths_dataframe (getDataFileName)
 import Test.HUnit
 
 allTypes :: D.DataFrame
@@ -50,32 +50,34 @@ allTypes =
             )
         ]
 
+readParquetDataFile :: FilePath -> IO D.DataFrame
+readParquetDataFile path = do
+    parquetFile <- getDataFileName path
+    D.readParquet parquetFile
+
 allTypesPlain :: Test
 allTypesPlain =
-    TestCase
-        ( assertEqual
-            "allTypesPlain"
-            allTypes
-            (unsafePerformIO (D.readParquet "./tests/data/alltypes_plain.parquet"))
-        )
+    TestCase $ do
+        df <- readParquetDataFile "tests/data/alltypes_plain.parquet"
+        assertEqual "allTypesPlain" allTypes df
 
 allTypesPlainSnappy :: Test
 allTypesPlainSnappy =
-    TestCase
-        ( assertEqual
+    TestCase $ do
+        df <- readParquetDataFile "tests/data/alltypes_plain.snappy.parquet"
+        assertEqual
             "allTypesPlainSnappy"
             (D.filter "id" (`elem` [6 :: Int32, 7]) allTypes)
-            (unsafePerformIO (D.readParquet "./tests/data/alltypes_plain.snappy.parquet"))
-        )
+            df
 
 allTypesDictionary :: Test
 allTypesDictionary =
-    TestCase
-        ( assertEqual
-            "allTypesPlainSnappy"
+    TestCase $ do
+        df <- readParquetDataFile "tests/data/alltypes_dictionary.parquet"
+        assertEqual
+            "allTypesDictionary"
             (D.filter "id" (`elem` [0 :: Int32, 1]) allTypes)
-            (unsafePerformIO (D.readParquet "./tests/data/alltypes_dictionary.parquet"))
-        )
+            df
 
 mtCarsDataset :: D.DataFrame
 mtCarsDataset =
@@ -528,14 +530,14 @@ mtCarsDataset =
 
 mtCars :: Test
 mtCars =
-    TestCase
-        ( assertEqual
-            "mt_cars"
-            mtCarsDataset
-            (unsafePerformIO (D.readParquet "./data/mtcars.parquet"))
-        )
+    TestCase $ do
+        df <- readParquetDataFile "data/mtcars.parquet"
+        assertEqual "mt_cars" mtCarsDataset df
 
--- Uncomment to run parquet tests.
--- Currently commented because they don't run with github CI
 tests :: [Test]
-tests = [] -- [allTypesPlain, allTypesPlainSnappy, allTypesDictionary, mtCars]
+tests =
+    [ allTypesPlain
+    , allTypesPlainSnappy
+    , allTypesDictionary
+    , mtCars
+    ]
