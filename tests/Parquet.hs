@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Parquet where
 
@@ -7,7 +8,7 @@ import qualified DataFrame as D
 import Data.Int
 import Data.Text (Text)
 import Data.Time
-import Paths_dataframe (getDataFileName)
+import Language.Haskell.TH.Syntax (lift, makeRelativeToProject)
 import Test.HUnit
 
 allTypes :: D.DataFrame
@@ -50,21 +51,20 @@ allTypes =
             )
         ]
 
-readParquetDataFile :: FilePath -> IO D.DataFrame
-readParquetDataFile path = do
-    parquetFile <- getDataFileName path
-    D.readParquet parquetFile
-
 allTypesPlain :: Test
 allTypesPlain =
     TestCase $ do
-        df <- readParquetDataFile "tests/data/alltypes_plain.parquet"
+        df <-
+            D.readParquet
+                $(makeRelativeToProject "tests/data/alltypes_plain.parquet" >>= lift)
         assertEqual "allTypesPlain" allTypes df
 
 allTypesPlainSnappy :: Test
 allTypesPlainSnappy =
     TestCase $ do
-        df <- readParquetDataFile "tests/data/alltypes_plain.snappy.parquet"
+        df <-
+            D.readParquet
+                $(makeRelativeToProject "tests/data/alltypes_plain.snappy.parquet" >>= lift)
         assertEqual
             "allTypesPlainSnappy"
             (D.filter "id" (`elem` [6 :: Int32, 7]) allTypes)
@@ -73,7 +73,9 @@ allTypesPlainSnappy =
 allTypesDictionary :: Test
 allTypesDictionary =
     TestCase $ do
-        df <- readParquetDataFile "tests/data/alltypes_dictionary.parquet"
+        df <-
+            D.readParquet
+                $(makeRelativeToProject "tests/data/alltypes_dictionary.parquet" >>= lift)
         assertEqual
             "allTypesDictionary"
             (D.filter "id" (`elem` [0 :: Int32, 1]) allTypes)
@@ -531,7 +533,7 @@ mtCarsDataset =
 mtCars :: Test
 mtCars =
     TestCase $ do
-        df <- readParquetDataFile "data/mtcars.parquet"
+        df <- D.readParquet $(makeRelativeToProject "data/mtcars.parquet" >>= lift)
         assertEqual "mt_cars" mtCarsDataset df
 
 tests :: [Test]

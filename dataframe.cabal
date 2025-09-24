@@ -16,9 +16,6 @@ copyright: (c) 2024-2025 Michael Chavinda
 category: Data
 tested-with: GHC ==9.8.3 || ==9.6.6 || == 9.4.8 || ==9.10.1 || ==9.12.1 || ==9.12.2
 extra-doc-files: CHANGELOG.md README.md
-extra-source-files:
-    tests/data/*.parquet
-    data/mtcars.parquet
 
 source-repository head
   type:     git
@@ -139,14 +136,13 @@ test-suite tests
                    Operations.Statistics,
                    Operations.Take,
                    Parquet
-                   Paths_dataframe
-    autogen-modules: Paths_dataframe
     build-depends:  base > 4 && < 5,
                     dataframe ^>= 0.3,
                     HUnit ^>= 1.6,
                     random >= 1 && < 2,
                     random-shuffle >= 0.0.4 && < 1,
                     random >= 1 && < 2,
+                    template-haskell >= 2.0 && < 3,
                     text >= 2.0 && < 3,
                     time >= 1.12 && < 2,
                     vector ^>= 0.13
